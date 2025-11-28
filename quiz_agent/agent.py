@@ -1,10 +1,11 @@
 from google.adk.agents import LlmAgent
 from google.adk.apps.app import App, EventsCompactionConfig
 from google.adk.models.google_llm import Gemini
+from google.adk.tools import AgentTool
 from google.adk.runners import Runner
 from google.adk.sessions.database_session_service import DatabaseSessionService
 from google.adk.agents.callback_context import CallbackContext
-# from google.adk.tools import google_search
+
 from .function_tools import (
     get_quiz_questions,
     start_quiz,
@@ -14,8 +15,11 @@ from .function_tools import (
     reset_quiz,
 )
 
+from .agent_tools import youtube_agent, diagram_agent
+
 from .prompts import quiz_instructions
-from .agent_utils import initialize_quiz_state
+from .agent_utils import initialize_quiz_state, retry_config
+
 
 from google.genai import types
 from typing import Optional
@@ -30,22 +34,13 @@ def before_agent_callback(callback_context: CallbackContext) -> Optional[types.C
     return None
 
 
-# Retry configuration for the agent invoking the LLM
-retry_config = types.HttpRetryOptions(
-    attempts=3,
-    initial_delay=1,
-    exp_base=5,
-    http_status_codes=[429, 500, 503, 504],
-)
-
-
 # The initial agent
 root_agent = LlmAgent(
+    name='QuizAgent',
     model=Gemini(
         model="gemini-2.5-flash",
         retry_options=retry_config,
     ),
-    name='QuizAgent',
     description='A helpful quiz master with a theoretical knowledge of guitar playing.',
     instruction=quiz_instructions,
     tools=[get_quiz_questions, 
@@ -53,7 +48,10 @@ root_agent = LlmAgent(
            submit_answer, 
            get_current_question, 
            get_quiz_status, 
-           reset_quiz],
+           reset_quiz,
+           AgentTool(agent=youtube_agent),
+           AgentTool(agent=diagram_agent),
+    ],
 )
 
 

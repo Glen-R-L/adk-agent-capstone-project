@@ -1,10 +1,15 @@
+import os
+from googleapiclient.discovery import build
+from typing import Dict, List, Any
+
 from google.adk.tools.tool_context import ToolContext
-from typing import Dict, Any
 
 from .quiz_data import quiz_questions
+from .agent_utils import YouTubeVideo, YouTubeSearchResults
 
 
 
+# Function for getting all quiz questions
 def get_quiz_questions() -> Dict[str, Any]:
     """
     Get all quiz questions for the Guitar Playing Theory quiz.
@@ -140,3 +145,46 @@ def reset_quiz(tool_context: ToolContext) -> Dict[str, Any]:
         "status": "success",
         "message": "Quiz has been reset. You can start again whenever you're ready.",
     }
+
+
+# Custom Function tool for fetching and correctly recieving youtube URLs - for the youtube_agent
+def search_youtube_videos(query: str, max_results: int = 3) -> YouTubeSearchResults:
+    """
+    Searches YouTube for videos based on a query and returns a structured list of results.
+    
+    ARGS:
+        query: Provided by the root agent as {session.genre_choice}
+        max_results (optional): Maximum number of videos returned in the YouTubeSearchResults list - set to 3 by default
+
+    RETURNS:
+        List of videos (YouTubeVideo objects) as a YouTubeSearchResults object
+    """
+    api_key = os.getenv("YOUTUBE_API_KEY")
+    if not api_key:
+        raise ValueError("YOUTUBE_API_KEY environment variable not set.")
+
+    youtube = build('youtube', 'v3', developerKey=api_key)
+
+    request = youtube.search().list(
+        part="snippet",
+        q=query,
+        type="video",
+        maxResults=max_results
+    )
+
+    response = request.execute()
+
+    videos = []
+    for item in response.get('items', []):
+        video_id = item['id']['videoId']
+        # ... fetch other details ...
+        url = f"https://www.youtube.com/watch?v={video_id}"
+
+        videos.append(YouTubeVideo(
+            title=item['snippet']['title'],
+            video_id=video_id,
+            url=url,
+            channel_title=item['snippet']['channelTitle']
+        ))
+
+    return YouTubeSearchResults(results=videos)

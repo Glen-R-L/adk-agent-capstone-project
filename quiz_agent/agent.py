@@ -26,8 +26,7 @@ from typing import Optional
 
 
 
-# Callback to initialize quiz state
-# https://google.github.io/adk-docs/callbacks/types-of-callbacks/#before-agent-callback
+# Callback function to initialize quiz state
 def before_agent_callback(callback_context: CallbackContext) -> Optional[types.Content]:
     """Initialize quiz state if not already present"""
     initialize_quiz_state(callback_context.state)
@@ -67,7 +66,7 @@ quiz_agent_app = App(
 
 
 # Database URL and service for storing session data - Using asynchronous sqlite
-db_url = "sqlite+aiosqlite:///session_data.db"
+db_url = "sqlite+aiosqlite:///./sessions.db"
 session_service = DatabaseSessionService(db_url=db_url)
 
 

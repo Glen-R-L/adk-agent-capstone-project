@@ -61,6 +61,18 @@ def submit_answer(tool_context: ToolContext, answer: str) -> Dict[str, Any]:
     state["total_answered"] = state.get("total_answered", 0) + 1
     if is_correct:
         state["correct_answers"] = state.get("correct_answers", 0) + 1
+    
+    # Update score percentage
+    total_answered = state.get("total_answered", 0)
+    if total_answered > 0:
+        state["score_percentage"] = (state.get("correct_answers", 0) / total_answered) * 100
+
+    # Move to the next question
+    state["current_question_index"] = i + 1
+
+    # Return a simple status for now
+    return {"status": "success", "is_correct": is_correct}
+
 
 
 def get_current_question(tool_context: ToolContext) -> Dict[str, Any]:
@@ -83,16 +95,17 @@ def get_current_question(tool_context: ToolContext) -> Dict[str, Any]:
         }
 
     i = state.get("current_question_index", 0)
-    if i < len(quiz_questions):
+    quiz = state.get("quiz", quiz_questions)
+    if i < len(quiz):
         return {
             "status": "success",
-            "question": quiz_questions[i][0],
+            "question": quiz[i][0],
             "question_number": i + 1,
-            "total_questions": len(quiz_questions),
+            "total_questions": len(quiz),
         }
     return {
-        "status": "error",
-        "error_message": "No current question - quiz may be complete",
+        "status": "quiz_completed",
+        "message": "The quiz is complete!",
     }
 
 

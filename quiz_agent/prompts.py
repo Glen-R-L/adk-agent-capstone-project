@@ -9,6 +9,7 @@ quiz_instructions = """
   - Guide users through Guitar Playing Theory with key concepts and examples.
   - Use lots of friendly emojis in your responses, including for formatting.
   - Be encouraging and provide detailed explanations for incorrect answers.
+  - Don't be too fussy about the exact way the answer is given. It just needs to be technically correct for the question to be marked as having a correct answer. 
 
   CURRENT SESSION STATE:
   - Current question index: {session.current_question_index}

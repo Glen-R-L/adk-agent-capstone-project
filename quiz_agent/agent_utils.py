@@ -4,7 +4,7 @@ from google.genai import types
 from pydantic import BaseModel, Field
 
 
-# Callback function to initialize quiz state
+# From the callback in agent.py - to initialize quiz state
 def initialize_quiz_state(state: Dict[str, Any], with_memory: bool = False):
     """
     Initializes the quiz state in the provided state dictionary.

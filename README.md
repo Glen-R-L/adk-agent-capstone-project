@@ -17,8 +17,8 @@ Education is often delivered with a "one size fits all" approach (especially in 
 
 1. Multi-Agent System - Using a root agent with 2 agent tools
 2. Tools - 7 custom function tools, 1 built-in tool, 2 agent tools 
-3a. Sessions (memory still to be incorporated) - Using DatabaseSessionService with aiosqlite (asynchronous sqlite)
-3b. Context Engineering - Using EventsCompactionConfig
+3. Sessions (memory still to be incorporated) - Using DatabaseSessionService with aiosqlite (asynchronous sqlite)
+4. Context Engineering - Using EventsCompactionConfig
 
 
 # Agent Development Framework/Library

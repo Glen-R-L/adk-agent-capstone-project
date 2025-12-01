@@ -55,7 +55,20 @@ def submit_answer(tool_context: ToolContext, answer: str) -> Dict[str, Any]:
     # Quiz questions loaded into state
     state.setdefault("quiz", quiz_questions)
     i = state.get("current_question_index", 0)
-    quiz = state.get("quiz", [])
+    total_answered = state.get("total_answered", 0)
+
+    # Prevent re-answering the same question
+    if i < total_answered:
+        return {
+            "status": "error",
+            "message": "This question has already been answered. Please wait for the next question.",
+        }
+    quiz = state.get("quiz")
+    if not quiz:
+        return {
+            "status": "error",
+            "message": "Quiz data is missing from the state. Please start the quiz.",
+        }
     correct_answer = quiz[i][1]
     is_correct = answer.strip().lower() == correct_answer.strip().lower()
     state["total_answered"] = state.get("total_answered", 0) + 1
@@ -70,9 +83,22 @@ def submit_answer(tool_context: ToolContext, answer: str) -> Dict[str, Any]:
     # Move to the next question
     state["current_question_index"] = i + 1
 
-    # Return a simple status for now
-    return {"status": "success", "is_correct": is_correct}
+    # Check if there is a next question and return it
+    next_i = state.get("current_question_index", 0)
+    if next_i < len(quiz):
+        return {
+            "status": "success",
+            "is_correct": is_correct,
+            "next_question": quiz[next_i][0],
+            "next_question_number": next_i + 1,
+            "total_questions": len(quiz),
+        }
 
+    # If the quiz is over
+    return {
+        "status": "quiz_completed",
+        "is_correct": is_correct,
+    }
 
 
 def get_current_question(tool_context: ToolContext) -> Dict[str, Any]:
